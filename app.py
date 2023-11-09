@@ -41,53 +41,79 @@ def plot_histogram(column, series, title, bins=20):
     # Plotting in the specified column with whole number labels
     column.bar_chart(hist_df.set_index(title))
 
+def calculate_material_kpis(df):
+    # Perform calculations for material data KPIs here
+    # Example: df['Variation'] = calculate_variation(df)
+    return df
+
+# Placeholder function to plot material data analytics
+# Implement the actual plotting of material data analytics
+def plot_material_analytics(df):
+    # Plot analytics for material data here
+    # Example: st.bar_chart(df['Variation'])
+    pass
+# Streamlit app
 # Streamlit app
 def main():
-    # Set wide mode layout
     st.set_page_config(layout="wide")
 
-    
-
-    # Sidebar - Project selection
+    # Sidebar - Dataset and Project selection
     st.sidebar.title("Filter")
+    dataset_type = st.sidebar.selectbox('Select Dataset Type', options=["Pour Data", "Material Data"])
     project_name = st.sidebar.selectbox('Select Project', options=["421 Park Drive", "BU Data Center - Holcim"])
+
+    # Set title to project name
     st.title(project_name)
-    # Project-specific year options
+
+    # Determine the available year options based on project name
     if project_name == "421 Park Drive":
         selected_year = st.sidebar.selectbox('Select Year', options=[2023])
-    else:  # BU data center
+    else:
         selected_year = st.sidebar.selectbox('Select Year', options=[2020, 2021, 2022, 2023])
 
     load_button = st.sidebar.button('Load Data')
 
     # Main - Load and display data
     if load_button:
-        if project_name == "421 Park view":
-            csv_file = 'pour data_2023.csv'  # Assuming there is only one file for "421 Park view"
-        else:
-            csv_file = f'BU Data/pour {selected_year}.csv'  # Assuming files are named like 'BU_data_center_2020.csv', etc.
+        # Determine the CSV file based on dataset type and project name
+        if dataset_type == "Pour Data":
+            if project_name == "421 Park Drive":
+                csv_file = 'pour data_2023.csv'  # Assuming there is only one file for "421 Park Drive"
+            else:
+                csv_file = f'BU Data/pour {selected_year}.csv'  # Adjust the path as needed
+            
+            # Load pour data
+            df = pd.read_csv(csv_file)
+            
+            # Calculate and display pour data KPIs
+            kpi_df = calculate_kpis(df)
+            kpi_pairs = [
+                ('Total Loading Time', 'Total Travel Time to Site'),
+                ('Onsite Wait Time', 'Average Speed of Pour')
+            ]
+            for kpi1, kpi2 in kpi_pairs:
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.subheader(f'{kpi1} (minutes)')
+                    plot_histogram(col1, kpi_df[kpi1], kpi1)
+                with col2:
+                    st.subheader(f'{kpi2} (minutes/quantity)' if 'Pour' in kpi2 else f'{kpi2} (minutes)')
+                    plot_histogram(col2, kpi_df[kpi2], kpi2)
 
-        # Load data
-        df = pd.read_csv(csv_file)
-        
-        # Calculate KPIs
-        kpi_df = calculate_kpis(df)
-        
-        # Define KPIs to plot
-        kpi_pairs = [
-            ('Total Loading Time', 'Total Travel Time to Site'),
-            ('Onsite Wait Time', 'Average Speed of Pour')
-        ]
-        
-        # Display histograms using Streamlit's native chart functions
-        for kpi1, kpi2 in kpi_pairs:
-            col1, col2 = st.columns(2)
-            with col1:
-                st.subheader(f'{kpi1} (minutes)')
-                plot_histogram(col1, kpi_df[kpi1], kpi1)
-            with col2:
-                st.subheader(f'{kpi2} (minutes/quantity)' if 'Pour' in kpi2 else f'{kpi2} (minutes)')
-                plot_histogram(col2, kpi_df[kpi2], kpi2)
+        elif dataset_type == "Material Data":
+            # Assuming material data files follow a similar naming convention
+            if project_name == "421 Park Drive":
+                csv_file = 'materials_data_2023.csv'  # Update with actual file path
+            else:
+                csv_file = f'BU Data/materials{selected_year}.csv'  # Update with actual file path
+            
+            # Load material data
+            df = pd.read_csv(csv_file)
+            
+            # Calculate and display material data KPIs
+            material_kpi_df = calculate_material_kpis(df)
+            # Implement the function to display material data analytics
+            plot_material_analytics(material_kpi_df)
 
 if __name__ == "__main__":
     main()
