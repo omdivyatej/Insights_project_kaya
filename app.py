@@ -56,7 +56,7 @@ def plot_material_analytics(df):
 # Streamlit app
 def main():
     st.set_page_config(layout="wide")
-    
+    st.set_page_config(page_title="Holcim | Analytics")
     # Sidebar - Dataset and Project selection
     st.sidebar.title("Filter")
     dataset_type = st.sidebar.selectbox('Select Dataset Type', options=["Pour Data", "Material Data"])
