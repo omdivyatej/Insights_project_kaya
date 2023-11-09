@@ -25,8 +25,9 @@ def calculate_kpis(df):
     return df
 
 # Function to plot a histogram in a given column
-def plot_histogram(column, series, title, bins=20):
+def plot_histogram(column, series, title, bins=20,description=""):
     # Create histogram data with rounded bins and counts
+    
     count, bin_edges = np.histogram(series.dropna(), bins=bins)
     bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
     bin_centers = np.round(bin_centers).astype(int)
@@ -37,9 +38,11 @@ def plot_histogram(column, series, title, bins=20):
         title: bin_centers,
         'Count': count
     })
-    
-    # Plotting in the specified column with whole number labels
+    column.subheader(title)
+    column.caption(description)  # Description below the title
     column.bar_chart(hist_df.set_index(title))
+    # Plotting in the specified column with whole number labels
+    
 # Function to calculate KPIs for material data
 def calculate_material_kpis(df):
     # Calculate the absolute variation
@@ -81,7 +84,7 @@ def plot_material_analytics(df):
     st.divider()
 
     st.subheader('Significant Discrepancies in Batched vs Required Quantity')
-    
+    st.caption("Displays rows where the batched quantity significantly differs from what was required.")  
     significant_variation_df = df[df['Absolute Variation'].abs() > 10]  # adjust the threshold as needed
     
     if not significant_variation_df.empty:
@@ -120,7 +123,13 @@ def main():
             
             # Load pour data
             df = pd.read_csv(csv_file)
-            
+            # Add descriptions for each KPI
+            descriptions = {
+                'Total Loading Time': "This graph shows the frequency of different loading times in minutes.",
+                'Total Travel Time to Site': "This graph displays how long it took for trucks to travel to the site.",
+                'Onsite Wait Time': "This graph represents the time trucks spent waiting on-site before pouring.",
+                'Average Speed of Pour': "This graph indicates the average speed of pouring concrete."
+            }
             # Calculate and display pour data KPIs
             kpi_df = calculate_kpis(df)
             kpi_pairs = [
@@ -130,11 +139,10 @@ def main():
             for kpi1, kpi2 in kpi_pairs:
                 col1, col2 = st.columns(2)
                 with col1:
-                    st.subheader(f'{kpi1} (frequency/minutes)')
-                    plot_histogram(col1, kpi_df[kpi1], kpi1)
+                    plot_histogram(col1, kpi_df[kpi1], kpi1, description=descriptions[kpi1])
                 with col2:
-                    st.subheader(f'{kpi2} (minutes/quantity)' if 'Pour' in kpi2 else f'{kpi2} (minutes)')
-                    plot_histogram(col2, kpi_df[kpi2], kpi2)
+                    plot_histogram(col2, kpi_df[kpi2], kpi2, description=descriptions.get(kpi2, ""))
+
 
         elif dataset_type == "Material Data":
             # Assuming material data files follow a similar naming convention
