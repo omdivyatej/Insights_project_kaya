@@ -40,18 +40,53 @@ def plot_histogram(column, series, title, bins=20):
     
     # Plotting in the specified column with whole number labels
     column.bar_chart(hist_df.set_index(title))
-
+# Function to calculate KPIs for material data
 def calculate_material_kpis(df):
-    # Perform calculations for material data KPIs here
-    # Example: df['Variation'] = calculate_variation(df)
+    # Calculate the absolute variation
+    df['Absolute Variation'] = df['batched_qty'] - df['required_qty']
+    # Calculate the percentage variation based on required quantity
+    df['Variation (%)'] = (df['Absolute Variation'] / df['required_qty']) * 100
+    
     return df
 
-# Placeholder function to plot material data analytics
-# Implement the actual plotting of material data analytics
 def plot_material_analytics(df):
-    # Plot analytics for material data here
-    # Example: st.bar_chart(df['Variation'])
-    pass
+    # Plotting comparison of Design, Required, and Batched Quantities
+    # We'll consider significant variations for visualization
+    
+    # Calculate summary statistics
+    total_required = df['required_qty'].sum()
+    total_batched = df['batched_qty'].sum()
+    total_variation = df['Absolute Variation'].sum()
+    avg_variation = df['Absolute Variation'].mean()
+
+    # Define the HTML template for the metric display
+    metric_template = """
+    <div style="padding: 10px; margin: 10px 0; border: 1px solid #eee; border-radius: 5px; text-align: center;">
+        <span style="font-size: 0.85em; color: grey;">{label}</span><br>
+        <span style="font-size: 2.5em; font-weight: bold;">{value}</span>
+    </div>
+    """
+
+    # Create two columns for the metrics with custom HTML formatting
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown(metric_template.format(label="Total Required Quantity", value=f"{total_required:,.2f}"), unsafe_allow_html=True)
+        st.markdown(metric_template.format(label="Total Batched Quantity", value=f"{total_batched:,.2f}"), unsafe_allow_html=True)
+
+    with col2:
+        st.markdown(metric_template.format(label="Total Variation", value=f"{total_variation:,.2f}"), unsafe_allow_html=True)
+        st.markdown(metric_template.format(label="Average Variation", value=f"{avg_variation:,.2f}"), unsafe_allow_html=True)
+
+
+
+    st.subheader('Significant Discrepancies in Batched vs Required Quantity')
+    significant_variation_df = df[df['Absolute Variation'].abs() > 10]  # adjust the threshold as needed
+    
+    if not significant_variation_df.empty:
+        st.dataframe(significant_variation_df[['material', 'required_qty', 'batched_qty', 'Absolute Variation']])
+    else:
+        st.write("No significant discrepancies found")
 # Streamlit app
 # Streamlit app
 def main():
@@ -94,7 +129,7 @@ def main():
             for kpi1, kpi2 in kpi_pairs:
                 col1, col2 = st.columns(2)
                 with col1:
-                    st.subheader(f'{kpi1} (minutes)')
+                    st.subheader(f'{kpi1} (frequency/minutes)')
                     plot_histogram(col1, kpi_df[kpi1], kpi1)
                 with col2:
                     st.subheader(f'{kpi2} (minutes/quantity)' if 'Pour' in kpi2 else f'{kpi2} (minutes)')
