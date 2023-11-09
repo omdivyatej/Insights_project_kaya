@@ -61,7 +61,7 @@ def plot_material_analytics(df):
 
     # Define the HTML template for the metric display
     metric_template = """
-    <div style="padding: 10px; margin: 10px 0; border: 1px solid #eee; border-radius: 5px; text-align: center;">
+    <div style="padding: 10px; margin: 10px 0; border: 1px solid transparent; border-radius: 5px; text-align: center;">
         <span style="font-size: 0.85em; color: grey;">{label}</span><br>
         <span style="font-size: 2.5em; font-weight: bold;">{value}</span>
     </div>
@@ -78,9 +78,10 @@ def plot_material_analytics(df):
         st.markdown(metric_template.format(label="Total Variation", value=f"{total_variation:,.2f}"), unsafe_allow_html=True)
         st.markdown(metric_template.format(label="Average Variation", value=f"{avg_variation:,.2f}"), unsafe_allow_html=True)
 
-
+    st.divider()
 
     st.subheader('Significant Discrepancies in Batched vs Required Quantity')
+    
     significant_variation_df = df[df['Absolute Variation'].abs() > 10]  # adjust the threshold as needed
     
     if not significant_variation_df.empty:
@@ -99,7 +100,7 @@ def main():
 
     # Set title to project name
     st.title(project_name)
-
+    st.divider()
     # Determine the available year options based on project name
     if project_name == "421 Park Drive":
         selected_year = st.sidebar.selectbox('Select Year', options=[2023])
