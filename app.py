@@ -94,7 +94,7 @@ def plot_material_analytics(df):
 # Streamlit app
 # Streamlit app
 def main():
-    st.set_page_config(layout="wide",page_title="Holcim | Analytics")
+    st.set_page_config(layout="wide",page_title="Holicim | Analytics")
    
     # Sidebar - Dataset and Project selection
     st.sidebar.title("Filter")
